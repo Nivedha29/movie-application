@@ -1,5 +1,3 @@
-'use server';
-
 export interface TmdbMovie {
   id: number;
   title: string;
@@ -9,32 +7,31 @@ export interface TmdbMovie {
 }
 
 interface TmdbResponse {
-  page: number;
   results: TmdbMovie[];
-  total_pages: number;
-  total_results: number;
 }
 
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
 export async function fetchMoviesByQuery(query: string): Promise<TmdbMovie[]> {
-  const apiKey = process.env.TMDB_API_KEY;
+  const token = process.env.TMDB_ACCESS_TOKEN;
 
-  if (!apiKey) {
-    throw new Error('TMDB_API_KEY is not set in environment variables.');
+  if (!token) {
+    throw new Error('TMDB_ACCESS_TOKEN is not set in .env.local');
   }
 
-  const url = `${TMDB_API_URL}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
-    query,
-  )}&include_adult=false&language=en-US&page=1`;
-
-  const res = await fetch(url, {
-    // Cache on the server for 1 hour; adjust as you like
-    next: { revalidate: 3600 },
-  });
+  const res = await fetch(
+    `${TMDB_API_URL}/discover/movie?with_genres=16,12,10751&certification_country=US&certification.lte=G&language=en-US&page=1`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        accept: 'application/json',
+      },
+      next: { revalidate: 3600 },
+    },
+  );
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch movies from TMDB: ${res.statusText}`);
+    throw new Error(`Failed to fetch movies from TMDB: ${res.status} ${res.statusText}`);
   }
 
   const data: TmdbResponse = await res.json();
