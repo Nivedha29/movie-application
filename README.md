@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Movie Application (TMDB Movie Search)
 
-## Getting Started
+A modern movie search web application built with **Next.js 15** that integrates **The Movie Database (TMDB) API** to display movie results with posters, release dates, genres, and descriptions. The application focuses on a clean UI, responsive layout, and category-based filtering (including Kids & Family movies).
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* ✅ Movie search using TMDB API
+* ✅ Displays movie poster, title, release date, overview
+* ✅ Genre tags (Action, Drama, Kids, Family, etc.)
+* ✅ Kids/Family movie filtering
+* ✅ Responsive 2-column card layout
+* ✅ Placeholder image fallback for missing posters
+* ✅ Server-side data fetching via Next.js App Router
+* ✅ Optimized images with next/image
+* ✅ Ready for deployment on Vercel
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Framework:** Next.js 15 (App Router)
+* **Language:** TypeScript
+* **UI Library:** Ant Design (antd)
+* **API:** TMDB (The Movie Database)
+* **Image Optimization:** next/image
+* **Date Formatting:** date-fns
+* **Version Control:** Git & GitHub
+* **Deployment:** Vercel
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+### Development Tools
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* **eslint** – Linting
+* **husky** – Git hooks management
+* **lint-staged** – Pre-commit linting
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The project is deployed using **Vercel**.
+To deploy:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push changes to GitHub
+2. Connect repo to Vercel
+3. Add environment variable `TMDB_ACCESS_TOKEN`
+4. Click Deploy 🚀
