@@ -1,0 +1,105 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.alert {
+  margin-bottom: 16px;
+}
+
+.searchBar {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.loaderText {
+  margin-top: 8px;
+  color: #666;
+}
+
+.results {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .results {
+    grid-template-columns: 1fr; /* 1 column on small screens */
+  }
+}
+
+.movieCard {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.poster {
+  width: 100px;
+  height: 150px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.posterPlaceholder {
+  width: 100px;
+  height: 150px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #999999;
+}
+
+.movieContent {
+  flex: 1;
+}
+
+.movieTitle {
+  margin: 0 0 4px;
+}
+
+.movieDate {
+  margin: 0 0 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.movieOverview {
+  margin: 0;
+  font-size: 13px;
+}
+
+.noResults {
+  margin-top: 16px;
+}
+
+.genreTags {
+  margin-bottom: 8px;
+}
+
+.genreTag {
+  margin-right: 4px;
+  margin-bottom: 4px;
+}

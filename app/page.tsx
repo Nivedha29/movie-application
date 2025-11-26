@@ -1,12 +1,9 @@
-import MovieGrid from '@/components/MovieGrid';
-import { fetchMoviesByQuery } from '@/lib/tmdb';
+import MovieSearchClient from '@/components/MovieSearchClient';
 
-export default async function HomePage() {
-  const movies = await fetchMoviesByQuery('return');
-
+export default function HomePage() {
   return (
     <main>
-      <MovieGrid movies={movies} />
+      <MovieSearchClient />
     </main>
   );
 }
