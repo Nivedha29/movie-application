@@ -69,16 +69,25 @@ a {
 }
 
 .movie-card-poster {
-  flex: 0 0 140px; /* fixed width column for poster */
-  max-width: 140px;
+  flex: 0 0 120px;
+  max-width: 120px;
 }
 
-.movie-card-poster img {
-  width: 140px;
-  height: 210px;
-  object-fit: cover;
-  display: block;
+@media (max-width: 600px) {
+  .movie-card-poster {
+    flex: none;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .movie-card-poster img {
+    width: 100%;
+    height: auto;
+    max-width: 220px;
+    margin: 0 auto;
+  }
 }
+
 
 .movie-card-content {
   flex: 1;
