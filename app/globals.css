@@ -39,14 +39,15 @@ a {
 .main-container {
   max-width: 1200px;
   width: 100%;
-  padding: 40px 32px 60px;
+  padding: 24px 16px 40px; /* a bit less padding on narrow screens */
 }
 
 /* Grid: 3 columns, equal spacing */
 
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* will be 1, 2, 3… columns depending on space */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
 }
 
@@ -98,28 +99,37 @@ a {
   margin-top: 8px;
 }
 
-@media (max-width: 960px) {
+/* Desktop: 3 columns */
+@media (min-width: 1200px) {
+  .movie-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
   .movie-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile: 1 column */
+@media (max-width: 767px) {
   .movie-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .movie-card-inner {
-    flex-direction: column; /* on small screens, stack poster above text */
-  }
+.movie-card-inner {
+  flex-direction: column; /* on small screens, stack poster above text */
+}
 
-  .movie-card-poster {
-    flex: none;
-    max-width: 100%;
-  }
+.movie-card-poster {
+  flex: none;
+  max-width: 100%;
+}
 
-  .movie-card-poster img {
-    width: 100%;
-    height: auto;
-  }
+.movie-card-poster img {
+  width: 100%;
+  height: auto;
 }
