@@ -37,17 +37,19 @@ a {
 }
 
 .main-container {
-  max-width: 1200px;
   width: 100%;
-  padding: 40px 32px 60px;
+  max-width: 1200px;
+  padding: clamp(16px, 4vw, 40px);
+  margin: 0 auto;
 }
 
 /* Grid: 3 columns, equal spacing */
 
-.movie-grid {
+.movie-grid,
+.results {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 /* Card styling similar to screenshot */
@@ -63,31 +65,21 @@ a {
 
 .movie-card-inner {
   display: flex;
-  flex-direction: row; /* ✅ poster left, text right */
-  align-items: flex-start;
   gap: 16px;
+  align-items: flex-start;
 }
 
+/* Poster sizing */
 .movie-card-poster {
-  flex: 0 0 120px;
-  max-width: 120px;
+  flex: 0 0 140px;
 }
 
-@media (max-width: 600px) {
-  .movie-card-poster {
-    flex: none;
-    max-width: 100%;
-    text-align: center;
-  }
-
-  .movie-card-poster img {
-    width: 100%;
-    height: auto;
-    max-width: 220px;
-    margin: 0 auto;
-  }
+.movie-card-poster img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
 }
-
 
 .movie-card-content {
   flex: 1;
@@ -107,28 +99,54 @@ a {
   margin-top: 8px;
 }
 
-@media (max-width: 960px) {
-  .movie-grid {
+/* Tablets */
+@media (max-width: 991px) {
+  .movie-grid,
+  .results {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .movie-card-poster {
+    flex: 0 0 120px;
   }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
-  .movie-grid {
+  .movie-grid,
+  .results {
     grid-template-columns: 1fr;
   }
 
   .movie-card-inner {
-    flex-direction: column; /* on small screens, stack poster above text */
+    flex-direction: column;
   }
 
   .movie-card-poster {
-    flex: none;
-    max-width: 100%;
+    width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
   }
 
   .movie-card-poster img {
     width: 100%;
-    height: auto;
+  }
+
+  .movieCard {
+    flex-direction: column;
+  }
+
+  .poster {
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .movieContent {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 20px;
   }
 }
