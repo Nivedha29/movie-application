@@ -37,19 +37,17 @@ a {
 }
 
 .main-container {
-  width: 100%;
   max-width: 1200px;
-  padding: clamp(16px, 4vw, 40px);
-  margin: 0 auto;
+  width: 100%;
+  padding: 40px 32px 60px;
 }
 
 /* Grid: 3 columns, equal spacing */
 
-.movie-grid,
-.results {
+.movie-grid {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 /* Card styling similar to screenshot */
@@ -65,20 +63,21 @@ a {
 
 .movie-card-inner {
   display: flex;
-  gap: 16px;
+  flex-direction: row; /* ✅ poster left, text right */
   align-items: flex-start;
+  gap: 16px;
 }
 
-/* Poster sizing */
 .movie-card-poster {
-  flex: 0 0 140px;
+  flex: 0 0 140px; /* fixed width column for poster */
+  max-width: 140px;
 }
 
 .movie-card-poster img {
-  width: 100%;
-  height: auto;
-  border-radius: 6px;
+  width: 140px;
+  height: 210px;
   object-fit: cover;
+  display: block;
 }
 
 .movie-card-content {
@@ -99,54 +98,28 @@ a {
   margin-top: 8px;
 }
 
-/* Tablets */
-@media (max-width: 991px) {
-  .movie-grid,
-  .results {
+@media (max-width: 960px) {
+  .movie-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .movie-card-poster {
-    flex: 0 0 120px;
   }
 }
 
-/* Mobile */
 @media (max-width: 768px) {
-  .movie-grid,
-  .results {
+  .movie-grid {
     grid-template-columns: 1fr;
   }
 
   .movie-card-inner {
-    flex-direction: column;
+    flex-direction: column; /* on small screens, stack poster above text */
   }
 
   .movie-card-poster {
-    width: 100%;
-    max-width: 220px;
-    margin: 0 auto;
+    flex: none;
+    max-width: 100%;
   }
 
   .movie-card-poster img {
     width: 100%;
-  }
-
-  .movieCard {
-    flex-direction: column;
-  }
-
-  .poster {
-    width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
-  }
-
-  .movieContent {
-    width: 100%;
-  }
-
-  .title {
-    font-size: 20px;
+    height: auto;
   }
 }
