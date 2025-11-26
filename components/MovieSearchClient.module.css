@@ -103,3 +103,9 @@
   margin-right: 4px;
   margin-bottom: 4px;
 }
+
+.paginationWrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
