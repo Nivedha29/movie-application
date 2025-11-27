@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Input, Button, Spin, Alert, Typography, Space, Tag, Pagination } from 'antd';
 import debounce from 'lodash/debounce';
+import Image from 'next/image';
 import styles from './MovieSearchClient.module.css';
 
 const { Title } = Typography;
@@ -131,6 +132,7 @@ export default function MovieSearchClient() {
       });
       setGenresMap(map);
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load genres', err);
     }
   }, []);
@@ -166,8 +168,6 @@ export default function MovieSearchClient() {
     setQuery(value);
     debouncedSearch(value);
   };
-
-  // 🔹 Optional: still support pressing Enter or button click
 
   // 🔹 Pagination change (server-side pagination)
   const handlePageChange = (page: number) => {
@@ -226,9 +226,11 @@ export default function MovieSearchClient() {
           {movies.map((movie) => (
             <div key={movie.id} className={styles.movieCard}>
               {movie.poster_path ? (
-                <img
+                <Image
                   src={`${TMDB_IMAGE_BASE_URL}${movie.poster_path}`}
                   alt={movie.title}
+                  width={200}
+                  height={300}
                   className={styles.poster}
                 />
               ) : (

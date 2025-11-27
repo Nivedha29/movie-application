@@ -3,6 +3,7 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_ACCESS_TOKEN = process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN;
 
 if (!TMDB_ACCESS_TOKEN) {
+  // eslint-disable-next-line no-console
   console.warn(
     '[TMDB] Missing NEXT_PUBLIC_TMDB_ACCESS_TOKEN (v4 token). Set it in .env.local.',
   );
@@ -120,6 +121,7 @@ export async function rateMovieOnTmdb(
     });
   } catch (err) {
     // Don’t break the UI if TMDB rejects it; just log
+    // eslint-disable-next-line no-console
     console.error('[TMDB] rateMovieOnTmdb failed', err);
   }
 }

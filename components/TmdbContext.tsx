@@ -1,4 +1,3 @@
-// components/TmdbContext.tsx
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -28,6 +27,7 @@ export const TmdbProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const g = await fetchGenres();
         setGenres(g);
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('[TmdbContext] failed to load genres', err);
       } finally {
         setIsReady(true);
