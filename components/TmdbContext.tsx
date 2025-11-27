@@ -1,102 +1,66 @@
+// components/TmdbContext.tsx
 'use client';
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  PropsWithChildren,
-} from 'react';
-import {
-  createGuestSession,
-  fetchGenres,
-  fetchGuestRatedMovies,
-  rateMovie as tmdbRateMovie,
-  TmdbGenre,
-} from '@/lib/tmdbClient';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { TmdbGenre, TmdbMovie, fetchGenres, rateMovieOnTmdb } from '@/lib/tmdbClient';
 
-type RatedMap = Record<number, number>; // movieId -> rating
+type RatedMap = Record<number, number>;
 
-interface TmdbContextValue {
-  guestSessionId: string | null;
+type TmdbContextValue = {
+  isReady: boolean;
   genres: TmdbGenre[];
   ratedMap: RatedMap;
-  isReady: boolean;
-  rateMovie: (movieId: number, rating: number) => Promise<void>;
-}
+  ratedMovies: TmdbMovie[]; // 👈 for the Rated tab
+  rateMovie: (movie: TmdbMovie, rating: number) => Promise<void>;
+};
 
 const TmdbContext = createContext<TmdbContextValue | undefined>(undefined);
 
-export const useTmdb = (): TmdbContextValue => {
-  const ctx = useContext(TmdbContext);
-  if (!ctx) throw new Error('useTmdb must be used within <TmdbProvider>');
-  return ctx;
-};
-
-export const TmdbProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
+export const TmdbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isReady, setIsReady] = useState(false);
   const [genres, setGenres] = useState<TmdbGenre[]>([]);
   const [ratedMap, setRatedMap] = useState<RatedMap>({});
-  const [isReady, setIsReady] = useState(false);
+  const [ratedMovies, setRatedMovies] = useState<TmdbMovie[]>([]);
 
   useEffect(() => {
-    async function init() {
+    const init = async () => {
       try {
-        // OPTIONAL: clear any old stored session ids so we always start fresh
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('tmdb_guest_session_id');
-        }
-
-        // 1) ALWAYS create a fresh guest session on app start
-        const session = await createGuestSession();
-        setGuestSessionId(session);
-
-        // 2) Fetch genres
-        const genresResult = await fetchGenres();
-        setGenres(genresResult);
-
-        // 3) Fetch rated movies for this new guest session
-        const { results } = await fetchGuestRatedMovies(session);
-        const newRatedMap: RatedMap = {};
-
-        results.forEach((m: any) => {
-          const ratedValue = m.rating ?? m.vote_average ?? 0;
-          newRatedMap[m.id] = ratedValue;
-        });
-
-        setRatedMap(newRatedMap);
-      } catch (e) {
-        console.error('Failed to init TMDB context', e);
+        const g = await fetchGenres();
+        setGenres(g);
+      } catch (err) {
+        console.error('[TmdbContext] failed to load genres', err);
       } finally {
         setIsReady(true);
       }
-    }
+    };
 
-    init();
+    void init();
   }, []);
 
-  const handleRateMovie = async (movieId: number, rating: number) => {
-    if (!guestSessionId) return;
-    await tmdbRateMovie(movieId, rating, guestSessionId);
+  const rateMovie = async (movie: TmdbMovie, rating: number) => {
+    // update local state for UI
+    setRatedMap((prev) => ({ ...prev, [movie.id]: rating }));
+    setRatedMovies((prev) => {
+      const existing = prev.find((m) => m.id === movie.id);
+      if (existing) {
+        return prev.map((m) => (m.id === movie.id ? { ...m } : m));
+      }
+      return [...prev, movie];
+    });
 
-    // optimistic update
-    setRatedMap((prev) => ({
-      ...prev,
-      [movieId]: rating,
-    }));
+    // best-effort push to TMDB (ignores errors)
+    await rateMovieOnTmdb(movie.id, rating);
   };
 
-  const value = useMemo(
-    () => ({
-      guestSessionId,
-      genres,
-      ratedMap,
-      isReady,
-      rateMovie: handleRateMovie,
-    }),
-    [guestSessionId, genres, ratedMap, isReady],
+  return (
+    <TmdbContext.Provider value={{ isReady, genres, ratedMap, ratedMovies, rateMovie }}>
+      {children}
+    </TmdbContext.Provider>
   );
+};
 
-  return <TmdbContext.Provider value={value}>{children}</TmdbContext.Provider>;
+export const useTmdb = () => {
+  const ctx = useContext(TmdbContext);
+  if (!ctx) throw new Error('useTmdb must be used inside a TmdbProvider');
+  return ctx;
 };

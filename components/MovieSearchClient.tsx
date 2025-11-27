@@ -201,17 +201,16 @@ export default function MovieSearchClient() {
       )}
 
       {/* 🔍 Auto-search input with optional button */}
-      <div className={styles.searchBar}>
-        <Input
-          placeholder="Search for a movie"
-          value={query}
-          onChange={handleInputChange} // ✅ THIS enables auto search
-          onPressEnter={() => {
-            debouncedSearch.cancel(); // optional immediate search
-            fetchMovies(query, 1);
-          }}
-        />
-      </div>
+      <Input
+        placeholder="Search for a movie"
+        value={query}
+        allowClear
+        onChange={handleInputChange}
+        onPressEnter={() => {
+          debouncedSearch.cancel();
+          fetchMovies(query, 1);
+        }}
+      />
 
       {/* 🌀 Loading spinner */}
       {loading && (

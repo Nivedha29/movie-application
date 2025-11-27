@@ -31,7 +31,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
   const ratingColor = getRatingColor(voteAverage);
 
   const handleChange = async (value: number) => {
-    await rateMovie(movie.id, value);
+    await rateMovie(movie, value);
   };
 
   return (

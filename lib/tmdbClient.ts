@@ -1,22 +1,12 @@
-// lib/tmdbClient.ts
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 const TMDB_ACCESS_TOKEN = process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN;
-const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
 if (!TMDB_ACCESS_TOKEN) {
-  console.warn('Missing NEXT_PUBLIC_TMDB_ACCESS_TOKEN (v4 token). Set it in .env.local.');
-}
-if (!TMDB_API_KEY) {
   console.warn(
-    'Missing NEXT_PUBLIC_TMDB_API_KEY (v3 key). Guest sessions & ratings need this.',
+    '[TMDB] Missing NEXT_PUBLIC_TMDB_ACCESS_TOKEN (v4 token). Set it in .env.local.',
   );
 }
-
-const TMDB_HEADERS: HeadersInit = {
-  ...(TMDB_ACCESS_TOKEN ? { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` } : {}),
-  'Content-Type': 'application/json;charset=utf-8',
-};
 
 export interface TmdbMovie {
   id: number;
@@ -33,70 +23,59 @@ export interface TmdbGenre {
   name: string;
 }
 
-// generic fetch using bearer + JSON
+// --- single fetch helper (Bearer auth) --------------------------------------
+
 async function tmdbFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${TMDB_BASE_URL}${path}`;
 
   const res = await fetch(url, {
     ...options,
     headers: {
-      ...TMDB_HEADERS,
+      Authorization: `Bearer ${TMDB_ACCESS_TOKEN ?? ''}`,
+      'Content-Type': 'application/json;charset=utf-8',
       ...(options?.headers || {}),
     },
   });
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`TMDB error ${res.status}: ${body}`);
+    throw new Error(`[TMDB] ${res.status} ${res.statusText}: ${body}`);
   }
 
   return res.json() as Promise<T>;
 }
 
-/**
- * Helper for endpoints that require `?api_key=<<v3 key>>`
- * (guest sessions & ratings).
- */
-async function tmdbFetchWithApiKey<T>(path: string, options?: RequestInit): Promise<T> {
-  if (!TMDB_API_KEY) {
-    throw new Error(
-      'TMDB_API_KEY not configured. Set NEXT_PUBLIC_TMDB_API_KEY in your env.',
-    );
-  }
-
-  const separator = path.includes('?') ? '&' : '?';
-  const pathWithKey = `${path}${separator}api_key=${TMDB_API_KEY}`;
-
-  return tmdbFetch<T>(pathWithKey, options);
-}
-
-// --------- 1) GUEST SESSION ---------
+// --- 1) (Optional) guest session, if you still want it ----------------------
 
 export async function createGuestSession(): Promise<string> {
-  const data = await tmdbFetchWithApiKey<{
+  const data = await tmdbFetch<{
     success: boolean;
     guest_session_id: string;
   }>('/authentication/guest_session/new');
 
+  if (!data.success || !data.guest_session_id) {
+    throw new Error('[TMDB] Failed to create guest session');
+  }
+
   return data.guest_session_id;
 }
 
-// --------- 2) GENRES ---------
+// --- 2) Genres --------------------------------------------------------------
 
 export async function fetchGenres(): Promise<TmdbGenre[]> {
   const data = await tmdbFetch<{ genres: TmdbGenre[] }>(
     '/genre/movie/list?language=en-US',
   );
-  return data.genres;
+  return data.genres ?? [];
 }
 
-// --------- 3) SEARCH MOVIES ---------
+// --- 3) Search & popular ----------------------------------------------------
 
 export async function searchMovies(
   query: string,
   page = 1,
 ): Promise<{ results: TmdbMovie[]; total_pages: number }> {
-  if (!query) {
+  if (!query.trim()) {
     return { results: [], total_pages: 1 };
   }
 
@@ -106,57 +85,41 @@ export async function searchMovies(
     )}`,
   );
 
-  return data;
+  return {
+    results: data.results ?? [],
+    total_pages: data.total_pages ?? 1,
+  };
 }
 
-// POPULAR MOVIES (default list) ---------
 export async function fetchPopularMovies(
   page = 1,
 ): Promise<{ results: TmdbMovie[]; total_pages: number }> {
   const data = await tmdbFetch<{ results: TmdbMovie[]; total_pages: number }>(
     `/movie/popular?language=en-US&page=${page}`,
   );
-  return data;
+
+  return {
+    results: data.results ?? [],
+    total_pages: data.total_pages ?? 1,
+  };
 }
 
-// --------- 4) GUEST RATED MOVIES ---------
+// --- 4) Rate a movie (best-effort send to TMDB) -----------------------------
 
-export async function fetchGuestRatedMovies(
-  guestSessionId: string,
-  page = 1,
-): Promise<{ results: TmdbMovie[]; total_pages: number }> {
-  if (!guestSessionId) {
-    return { results: [], total_pages: 0 };
-  }
-
-  const path = `/guest_session/${guestSessionId}/rated/movies?page=${page}&sort_by=created_at.asc`;
-
-  try {
-    const data = await tmdbFetchWithApiKey<{
-      results: TmdbMovie[];
-      total_pages: number;
-    }>(path);
-
-    return data;
-  } catch {
-    // silently ignore when no rated movies exist
-    return { results: [], total_pages: 0 };
-  }
-}
-
-// --------- 5) RATE A MOVIE ---------
-
-export async function rateMovie(
+export async function rateMovieOnTmdb(
   movieId: number,
   rating: number,
-  guestSessionId: string,
+  guestSessionId?: string | null,
 ): Promise<void> {
-  if (!guestSessionId) return;
+  try {
+    const query = guestSessionId ? `?guest_session_id=${guestSessionId}` : '';
 
-  const path = `/movie/${movieId}/rating?guest_session_id=${guestSessionId}`;
-
-  await tmdbFetchWithApiKey(path, {
-    method: 'POST',
-    body: JSON.stringify({ value: rating }), // 0.5–10.0
-  });
+    await tmdbFetch(`/movie/${movieId}/rating${query}`, {
+      method: 'POST',
+      body: JSON.stringify({ value: rating }),
+    });
+  } catch (err) {
+    // Don’t break the UI if TMDB rejects it; just log
+    console.error('[TMDB] rateMovieOnTmdb failed', err);
+  }
 }
